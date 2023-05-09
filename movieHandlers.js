@@ -27,6 +27,7 @@ const movies = [
   },
 ];
 
+// GET => MOVIES
 const getMovies = (req, res) => {
   // res.json(movies);
   database
@@ -40,6 +41,7 @@ const getMovies = (req, res) => {
   });
 };
 
+// GET => MOVIE WITH ID
 const getMovieById = (req, res) => {
   const id = parseInt(req.params.id);
  
@@ -58,7 +60,7 @@ const getMovieById = (req, res) => {
   });
 };
 
-
+// GET => USERS
 const getUsers = (req, res) => {
   database
   .query("select * from users")
@@ -71,6 +73,7 @@ const getUsers = (req, res) => {
   });
 }
 
+// GET => USER WITH ID
 const getUserById = (req, res) => {
   const id = parseInt(req.params.id);
  
@@ -89,9 +92,48 @@ const getUserById = (req, res) => {
   });
 };
 
+// POST => MOVIE
+const postMovie = (req, res) => {
+  const { title, director, year, color, duration } = req.body;
+
+  database
+    .query(
+      "INSERT INTO movies(title, director, year, color, duration) VALUES (?, ?, ?, ?, ?)",
+      [title, director, year, color, duration]
+    )
+    .then(([result]) => {
+      res.location(`/api/movies/${result.insertId}`).sendStatus(201);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error saving the movie");
+    });
+};
+
+
+// POST => USER
+const postUser = (req, res) => {
+  const { firstname, lastname, email, city, language } = req.body;
+
+  database
+    .query(
+      "INSERT INTO users(firstname, lastname, email, city, language) VALUES (?, ?, ?, ?, ?)",
+      [firstname, lastname, email, city, language]
+    )
+    .then(([result]) => {
+      res.location(`/api/users/${result.insertId}`).sendStatus(201);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error saving user");
+    });
+};
+
 module.exports = {
   getMovies,
   getMovieById,
   getUsers,
   getUserById,
+  postMovie,
+  postUser,
 };
