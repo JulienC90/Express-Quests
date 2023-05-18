@@ -32,9 +32,9 @@ app.post("/api/users", validateUser, movieHandlers.postUser);
 
 
 // PUT ROUTES
-app.put("/api/movies/:id", movieHandlers.updateMovie);
+app.put("/api/movies/:id", validateMovie, movieHandlers.updateMovie);
 
-app.put("/api/users/:id", movieHandlers.updateUser);
+app.put("/api/users/:id", validateUser, movieHandlers.updateUser);
 
 
 app.listen(port, (err) => {
