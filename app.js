@@ -3,6 +3,7 @@ const express = require("express");
 
 const app = express();
 
+
 app.use(express.json());
 
 const port = process.env.APP_PORT ?? 4000;
@@ -14,6 +15,7 @@ const welcome = (req, res) => {
 app.get("/", welcome);
 
 const movieHandlers = require("./movieHandlers");
+const { validateMovie, validateUser } = require("./validators.js");
 
 // GET ROUTES
 app.get("/api/movies", movieHandlers.getMovies);
@@ -24,9 +26,9 @@ app.get("/api/users/:id", movieHandlers.getUserById);
 
 
 // POST ROUTES
-app.post("/api/movies", movieHandlers.postMovie);
+app.post("/api/movies", validateMovie, movieHandlers.postMovie);
 
-app.post("/api/users", movieHandlers.postUser);
+app.post("/api/users", validateUser, movieHandlers.postUser);
 
 
 app.listen(port, (err) => {
