@@ -14,31 +14,38 @@ const welcome = (req, res) => {
 app.get("/", welcome);
 
 const movieHandlers = require("./movieHandlers");
+const userHandlers = require("./userHandlers");
 
 // GET ROUTES
 app.get("/api/movies", movieHandlers.getMovies);
 app.get("/api/movies/:id", movieHandlers.getMovieById);
 
-app.get("/api/users", movieHandlers.getUsers);
-app.get("/api/users/:id", movieHandlers.getUserById);
+app.get("/api/users", userHandlers.getUsers);
+app.get("/api/users/:id", userHandlers.getUserById);
 
 
 // POST ROUTES
 app.post("/api/movies", movieHandlers.postMovie);
 
-app.post("/api/users", movieHandlers.postUser);
+// app.post("/api/users", userHandlers.postUser);
 
 
 // PUT ROUTES
 app.put("/api/movies/:id", movieHandlers.updateMovie);
 
-app.put("/api/users/:id", movieHandlers.updateUser);
+// app.put("/api/users/:id", userHandlers.updateUser);
 
 
 // DELETE ROUTES
 app.delete("/api/movies/:id", movieHandlers.deleteMovie);
 
-app.delete("/api/users/:id", movieHandlers.deleteUser);
+app.delete("/api/users/:id", userHandlers.deleteUser);
+
+
+// HASHED PASSWORD ROUTES
+const { hashPassword } = require("./auth.js");
+app.post("/api/users", hashPassword, userHandlers.postUser);
+app.put("/api/users/:id", hashPassword, userHandlers.updateUser);
 
 
 app.listen(port, (err) => {

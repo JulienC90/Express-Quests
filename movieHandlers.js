@@ -60,38 +60,6 @@ const getMovieById = (req, res) => {
   });
 };
 
-// GET => USERS
-const getUsers = (req, res) => {
-  database
-  .query("select * from users")
-  .then(([users]) => {
-    res.json(users);
-  })
-  .catch((err) => {
-    console.error(err);
-    res.status(500).send("Error retrieving data from database");
-  });
-}
-
-// GET => USER WITH ID
-const getUserById = (req, res) => {
-  const id = parseInt(req.params.id);
- 
-  database
-  .query("select * from users where id = ?", [id])
-  .then(([users]) => {
-    if (users[0] != null) {
-      res.json(users[0]);
-    } else {
-      res.status(404).send("Not Found");
-    }
-  })
-  .catch((err) => {
-    console.error(err);
-    res.status(500).send("Error retrieving data from database");
-  });
-};
-
 // POST => MOVIE
 const postMovie = (req, res) => {
   const { title, director, year, color, duration } = req.body;
@@ -107,25 +75,6 @@ const postMovie = (req, res) => {
     .catch((err) => {
       console.error(err);
       res.status(500).send("Error saving the movie");
-    });
-};
-
-
-// POST => USER
-const postUser = (req, res) => {
-  const { firstname, lastname, email, city, language } = req.body;
-
-  database
-    .query(
-      "INSERT INTO users(firstname, lastname, email, city, language) VALUES (?, ?, ?, ?, ?)",
-      [firstname, lastname, email, city, language]
-    )
-    .then(([result]) => {
-      res.location(`/api/users/${result.insertId}`).sendStatus(201);
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send("Error saving user");
     });
 };
 
@@ -153,29 +102,7 @@ const updateMovie = (req, res) => {
     })
 }
 
-// UPDATE => USERS (BY ID)
 
-const updateUser = (req, res) => {
-  const id = parseInt(req.params.id);
-  const { firstname, lastname, email, city, language } = req.body;
-
-  database
-    .query(
-      "UPDATE users SET firstname = ?, lastname = ?, email = ?, city = ?, language = ? WHERE id = ?",
-      [firstname, lastname, email, city, language, id]
-    )
-    .then(([result]) => {
-      if (result.affectedRows === 0) {
-        res.status(404).send("Not Found");
-      } else {
-        res.sendStatus(204);
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send("Error updating the user");
-    })
-}
 
 
 // DELETE => MOVIE
@@ -198,34 +125,10 @@ const deleteMovie = (req, res) => {
     })
 }
 
-const deleteUser = (req, res) => {
-  const id = parseInt(req.params.id);
-
-  database
-    .query("DELETE FROM users WHERE id = ?", [id])
-    .then(([result]) => {
-      if (result.affectedRows === 0) {
-        res.status(404).send("Not Found");
-      } else {
-        res.sendStatus(204);
-      }
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send("Error deleting the user");
-    })
-}
-
-
 module.exports = {
   getMovies,
   getMovieById,
-  getUsers,
-  getUserById,
   postMovie,
-  postUser,
   updateMovie,
-  updateUser,
   deleteMovie,
-  deleteUser
 };
