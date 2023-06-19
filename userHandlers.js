@@ -2,8 +2,9 @@ const database = require("./database.js");
 
 // GET => USERS
 const getUsers = (req, res) => {
+    // id, firstname, lastname, email, city, language
     database
-    .query("SELECT id, firstname, lastname, email, city, language FROM users")
+    .query("SELECT * FROM users")
     .then(([users]) => {
       res.json(users);
     })
@@ -16,9 +17,9 @@ const getUsers = (req, res) => {
 // GET => USER WITH ID
 const getUserById = (req, res) => {
     const id = parseInt(req.params.id);
-   
+   // id, firstname, lastname, email, city, language
     database
-    .query("SELECT id, firstname, lastname, email, city, language FROM users WHERE id = ?", [id])
+    .query("SELECT * FROM users WHERE id = ?", [id])
     .then(([users]) => {
       if (users[0] != null) {
         res.json(users[0]);
@@ -31,6 +32,27 @@ const getUserById = (req, res) => {
       res.status(500).send("Error retrieving data from database");
     });
 };
+
+// GET => USER WITH EMAIL (POST ROUTE)
+const getUserByEmailWithPasswordAndPassToNext = (req, res, next) => {
+    const { email } = req.body;
+
+    database
+    .query("SELECT * FROM users WHERE email = ?", [email])
+    .then(([users]) => {
+      if (users[0] != null) {
+        req.user = users[0];
+
+        next();
+      } else {
+        res.sendStatus(401);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error retrieving data from database");
+    })
+}
 
 // POST => USER
 const postUser = (req, res) => {
@@ -55,17 +77,21 @@ const postUser = (req, res) => {
 const updateUser = (req, res) => {
     const id = parseInt(req.params.id);
     const { firstname, lastname, email, city, language, hashedPassword } = req.body;
-  
+    if (id !== req.payload.sub) {
+      res.sendStatus(403);
+      return;
+    }
+
     database
       .query(
         "UPDATE users SET firstname = ?, lastname = ?, email = ?, city = ?, language = ?, hashedPassword = ? WHERE id = ?",
         [firstname, lastname, email, city, language, hashedPassword, id]
       )
       .then(([result]) => {
-        if (result.affectedRows === 0) {
-          res.status(404).send("Not Found");
-        } else {
+        if (result.affectedRows !== 0) {
           res.sendStatus(204);
+        } else {
+          res.status(404).send("Not Found");
         }
       })
       .catch((err) => {
@@ -77,6 +103,10 @@ const updateUser = (req, res) => {
 
   const deleteUser = (req, res) => {
     const id = parseInt(req.params.id);
+    if (id !== req.payload.sub) {
+      res.sendStatus(403);
+      return;
+    }
   
     database
       .query("DELETE FROM users WHERE id = ?", [id])
@@ -96,6 +126,7 @@ const updateUser = (req, res) => {
   module.exports = {
     getUsers,
     getUserById,
+    getUserByEmailWithPasswordAndPassToNext,
     postUser,
     updateUser,
     deleteUser

@@ -11,43 +11,6 @@ const welcome = (req, res) => {
   res.send("Welcome to my favourite movie list");
 };
 
-app.get("/", welcome);
-
-const movieHandlers = require("./movieHandlers");
-const userHandlers = require("./userHandlers");
-
-// GET ROUTES
-app.get("/api/movies", movieHandlers.getMovies);
-app.get("/api/movies/:id", movieHandlers.getMovieById);
-
-app.get("/api/users", userHandlers.getUsers);
-app.get("/api/users/:id", userHandlers.getUserById);
-
-
-// POST ROUTES
-app.post("/api/movies", movieHandlers.postMovie);
-
-// app.post("/api/users", userHandlers.postUser);
-
-
-// PUT ROUTES
-app.put("/api/movies/:id", movieHandlers.updateMovie);
-
-// app.put("/api/users/:id", userHandlers.updateUser);
-
-
-// DELETE ROUTES
-app.delete("/api/movies/:id", movieHandlers.deleteMovie);
-
-app.delete("/api/users/:id", userHandlers.deleteUser);
-
-
-// HASHED PASSWORD ROUTES
-const { hashPassword } = require("./auth.js");
-app.post("/api/users", hashPassword, userHandlers.postUser);
-app.put("/api/users/:id", hashPassword, userHandlers.updateUser);
-
-
 app.listen(port, (err) => {
   if (err) {
     console.error("Something bad happened");
@@ -55,3 +18,27 @@ app.listen(port, (err) => {
     console.log(`Server is listening on ${port}`);
   }
 });
+
+const { hashPassword, verifyPassword, verifyToken } = require("./auth.js");
+app.get("/", welcome);
+
+const movieHandlers = require("./movieHandlers");
+const userHandlers = require("./userHandlers");
+
+// PUBLIC ROUTES
+app.get("/api/movies", movieHandlers.getMovies);
+app.get("/api/movies/:id", movieHandlers.getMovieById);
+app.get("/api/users", userHandlers.getUsers);
+app.get("/api/users/:id", userHandlers.getUserById);
+app.post("/api/users", hashPassword, userHandlers.postUser);
+app.post("/api/login",  userHandlers.getUserByEmailWithPasswordAndPassToNext, verifyPassword);
+
+
+// AUTHENTICATION NEEDED
+app.use(verifyToken);
+
+app.post("/api/movies", movieHandlers.postMovie);
+app.put("/api/movies/:id", movieHandlers.updateMovie);
+app.put("/api/users/:id", hashPassword, userHandlers.updateUser);
+app.delete("/api/movies/:id", movieHandlers.deleteMovie);
+app.delete("/api/users/:id", userHandlers.deleteUser);
